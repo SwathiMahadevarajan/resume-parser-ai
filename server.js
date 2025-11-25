@@ -50,7 +50,7 @@ const upload = multer({
   }
 });
 
-// IMPORTANT: Serve static files BEFORE other routes
+//Serve static files BEFORE other routes
 app.use(express.static('public'));
 
 // Parse resume endpoint
