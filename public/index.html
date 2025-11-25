@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume Parser AI ✨</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f0f23;
+            min-height: 100vh;
+            padding: 20px;
+            color: #fff;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3), transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(72, 187, 120, 0.3), transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(236, 72, 153, 0.3), transparent 50%);
+            animation: gradient-shift 15s ease infinite;
+            z-index: -1;
+        }
+
+        @keyframes gradient-shift {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            animation: fadeInDown 0.8s ease;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            color: #a0aec0;
+        }
+
+        .main-card {
+            background: rgba(26, 32, 44, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .upload-section {
+            padding: 80px 40px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+        }
+
+        .upload-area {
+            border: 3px dashed rgba(102, 126, 234, 0.5);
+            border-radius: 20px;
+            padding: 60px 40px;
+            background: rgba(26, 32, 44, 0.5);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .upload-area:hover::before {
+            left: 100%;
+        }
+
+        .upload-area.dragover {
+            border-color: #48bb78;
+            background: rgba(72, 187, 120, 0.1);
+            border-style: solid;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .upload-text {
+            font-size: 1.5rem;
+            color: #e2e8f0;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .upload-subtext {
+            color: #a0aec0;
+            font-size: 1rem;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 25px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.6);
+        }
+
+        .loading {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            margin-top: 15px;
+            color: #a0aec0;
+            font-size: 1.1rem;
+        }
+
+        .results-section {
+            display: none;
+            padding: 40px;
+        }
+
+        .results-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .results-title {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .icon-btn {
+            background: rgba(102, 126, 234, 0.2);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .icon-btn:hover {
+            background: rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .icon-btn.success {
+            background: rgba(72, 187, 120, 0.2);
+            border-color: rgba(72, 187, 120, 0.3);
+            color: #48bb78;
+        }
+
+        .result-card {
+            background: rgba(45, 55, 72, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .result-card:hover {
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .result-card h2 {
+            color: #e2e8f0;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+        }
+
+        .card-icon {
+            font-size: 1.8rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-item {
+            background: rgba(26, 32, 44, 0.6);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 3px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            background: rgba(26, 32, 44, 0.8);
+            transform: translateX(5px);
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: #a0aec0;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: #e2e8f0;
+            font-weight: 500;
+            word-break: break-word;
+        }
+
+        .experience-item, .education-item {
+            background: rgba(26, 32, 44, 0.6);
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .experience-item:hover, .education-item:hover {
+            background: rgba(26, 32, 44, 0.8);
+            transform: translateX(5px);
+        }
+
+        .experience-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .experience-title {
+            font-weight: 700;
+            color: #e2e8f0;
+            font-size: 1.2rem;
+        }
+
+        .experience-company {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .experience-date {
+            color: #a0aec0;
+            font-size: 0.95rem;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 5px 12px;
+            border-radius: 6px;
+        }
+
+        .experience-location {
+            color: #a0aec0;
+            font-size: 0.95rem;
+            margin-bottom: 12px;
+        }
+
+        .experience-description {
+            color: #cbd5e0;
+            line-height: 1.7;
+        }
+
+        .skills-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .skill-tag {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            color: #a0d2f5;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .skill-tag:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.3) 0%, rgba(118, 75, 162, 0.3) 100%);
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background: rgba(245, 101, 101, 0.2);
+            color: #fc8181;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 4px solid #f56565;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+            animation: shake 0.5s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: #a0aec0;
+            font-weight: 500;
+        }
+
+        .json-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .json-modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .json-content {
+            background: rgba(26, 32, 44, 0.95);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .json-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .json-header h3 {
+            color: #e2e8f0;
+            font-size: 1.5rem;
+        }
+
+        .close-btn {
+            background: rgba(245, 101, 101, 0.2);
+            border: 1px solid rgba(245, 101, 101, 0.3);
+            color: #fc8181;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: rgba(245, 101, 101, 0.3);
+            transform: rotate(90deg);
+        }
+
+        .json-code {
+            background: #1a202c;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #68d391;
+        }
+/* Info Banner Styles */
+.info-banner {
+    background: rgba(26, 32, 44, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 40px;
+    margin-bottom: 40px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+}
+
+.info-content h2 {
+    color: #e2e8f0;
+    font-size: 2rem;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.info-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.info-step {
+    display: flex;
+    gap: 15px;
+    align-items: start;
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.step-content h3 {
+    color: #e2e8f0;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+}
+
+.step-content p {
+    color: #a0aec0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+.tech-stack {
+    text-align: center;
+    padding-top: 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tech-stack h3 {
+    color: #e2e8f0;
+    margin-bottom: 20px;
+}
+
+.tech-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+}
+
+.tech-badge {
+    background: rgba(102, 126, 234, 0.2);
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    color: #a0d2f5;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .info-steps {
+        grid-template-columns: 1fr;
+    }
+}
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .results-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✨ Resume Parser AI</h1>
+            <p>Transform resumes into structured data with AI magic</p>
+        </div>
+<!-- Add this right after the header section, before main-card -->
+<div class="info-banner" style="animation: fadeInUp 0.8s ease 0.2s both;">
+    <div class="info-content">
+        <h2>🔍 How It Works</h2>
+        <div class="info-steps">
+            <div class="info-step">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>📄 Upload Resume</h3>
+                    <p>Drop your PDF, DOCX, or TXT resume. We extract raw text using specialized parsers.</p>
+                </div>
+            </div>
+            <div class="info-step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>🧹 Clean & Validate</h3>
+                    <p>Remove PDF artifacts, validate content, and ensure it's actually a resume.</p>
+                </div>
+            </div>
+            <div class="info-step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>🤖 AI Processing</h3>
+                    <p>Groq's LLM (Llama 3.1) analyzes text and extracts structured information.</p>
+                </div>
+            </div>
+            <div class="info-step">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>✨ Structured Output</h3>
+                    <p>Get clean JSON with personal info, experience, education, and skills.</p>
+                </div>
+            </div>
+        </div>
+        <div class="tech-stack">
+            <h3>⚡ Tech Stack</h3>
+            <div class="tech-badges">
+                <span class="tech-badge">Node.js</span>
+                <span class="tech-badge">Express</span>
+                <span class="tech-badge">Groq AI</span>
+                <span class="tech-badge">PDF Parser</span>
+                <span class="tech-badge">Zod Validation</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <div class="main-card">
+            <!-- Upload Section -->
+            <div class="upload-section" id="uploadSection">
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">🚀</div>
+                    <div class="upload-text">Drop your resume here</div>
+                    <div class="upload-subtext">Supports PDF, DOCX, and TXT files</div>
+                    <input type="file" id="fileInput" accept=".pdf,.docx,.txt">
+                    <button class="btn" onclick="document.getElementById('fileInput').click()">
+                        Choose File
+                    </button>
+                </div>
+
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p class="loading-text">Parsing your resume with AI...</p>
+                </div>
+
+                <div class="error-message" id="errorMessage"></div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="results-section" id="resultsSection">
+                <div class="results-header">
+                    <div class="results-title">📊 Parsed Results</div>
+                    <div class="action-buttons">
+                        <button class="icon-btn" id="copyJsonBtn" onclick="copyAsJSON()">
+                            <span>📋</span> Copy JSON
+                        </button>
+                        <button class="icon-btn" onclick="viewJSON()">
+                            <span>👁️</span> View JSON
+                        </button>
+                        <button class="btn btn-secondary" onclick="resetUpload()">
+                            Upload New
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="stats" id="stats"></div>
+
+                <!-- Personal Information -->
+                <div class="result-card" id="personalCard">
+                    <h2><span class="card-icon">👤</span> Personal Information</h2>
+                    <div class="info-grid" id="personalInfo"></div>
+                </div>
+
+                <!-- Summary -->
+                <div class="result-card" id="summaryCard" style="display: none;">
+                    <h2><span class="card-icon">📝</span> Professional Summary</h2>
+                    <p id="summaryText" style="line-height: 1.8; color: #cbd5e0;"></p>
+                </div>
+
+                <!-- Experience -->
+                <div class="result-card" id="experienceCard">
+                    <h2><span class="card-icon">💼</span> Work Experience</h2>
+                    <div id="experienceList"></div>
+                </div>
+
+                <!-- Education -->
+                <div class="result-card" id="educationCard">
+                    <h2><span class="card-icon">🎓</span> Education</h2>
+                    <div id="educationList"></div>
+                </div>
+
+                <!-- Skills -->
+                <div class="result-card" id="skillsCard">
+                    <h2><span class="card-icon">⚡</span> Skills</h2>
+                    <div class="skills-container" id="skillsList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JSON Modal -->
+    <div class="json-modal" id="jsonModal">
+        <div class="json-content">
+            <div class="json-header">
+                <h3>JSON Output</h3>
+                <button class="close-btn" onclick="closeJSON()">×</button>
+            </div>
+            <pre class="json-code" id="jsonCode"></pre>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const loading = document.getElementById('loading');
+        const uploadSection = document.getElementById('uploadSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const errorMessage = document.getElementById('errorMessage');
+        const jsonModal = document.getElementById('jsonModal');
+        
+        let currentData = null;
+
+        // Drag and drop handlers
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) handleFile(file);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) handleFile(file);
+        });
+
+        async function handleFile(file) {
+            const validTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'text/plain'];
+            if (!validTypes.includes(file.type) && !file.name.match(/\.(pdf|docx|txt)$/i)) {
+                showError('Please upload a valid PDF, DOCX, or TXT file');
+                return;
+            }
+
+            loading.classList.add('active');
+            errorMessage.classList.remove('active');
+
+            const formData = new FormData();
+            formData.append('resume', file);
+
+            try {
+                const response = await fetch('/api/parse', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    currentData = result.data;
+                    displayResults(result.data);
+                } else {
+                    showError(result.error.message || 'Failed to parse resume');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            } finally {
+                loading.classList.remove('active');
+            }
+        }
+
+        function displayResults(data) {
+            uploadSection.style.display = 'none';
+            resultsSection.classList.add('active');
+
+            displayStats(data);
+            displayPersonalInfo(data.personal);
+
+            if (data.summary) {
+                document.getElementById('summaryCard').style.display = 'block';
+                document.getElementById('summaryText').textContent = data.summary;
+            }
+
+            displayExperience(data.experience || []);
+            displayEducation(data.education || []);
+            displaySkills(data.skills || []);
+        }
+
+        function displayStats(data) {
+            const stats = document.getElementById('stats');
+            const experienceCount = (data.experience || []).length;
+            const educationCount = (data.education || []).length;
+            const skillsCount = (data.skills || []).length;
+
+            stats.innerHTML = `
+                <div class="stat-card">
+                    <div class="stat-number">${experienceCount}</div>
+                    <div class="stat-label">Experiences</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${educationCount}</div>
+                    <div class="stat-label">Education</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">${skillsCount}</div>
+                    <div class="stat-label">Skills</div>
+                </div>
+            `;
+        }
+
+        function displayPersonalInfo(personal) {
+            const container = document.getElementById('personalInfo');
+            container.innerHTML = '';
+
+            const fields = [
+                { label: 'Full Name', value: personal.fullName, icon: '👤' },
+                { label: 'Email', value: personal.email, icon: '📧' },
+                { label: 'Phone', value: personal.phone, icon: '📱' },
+                { label: 'Location', value: personal.location, icon: '📍' },
+                { label: 'LinkedIn', value: personal.linkedin, icon: '💼' },
+                { label: 'Portfolio', value: personal.portfolio, icon: '🌐' }
+            ];
+
+            fields.forEach(field => {
+                if (field.value) {
+                    container.innerHTML += `
+                        <div class="info-item">
+                            <div class="info-label">${field.icon} ${field.label}</div>
+                            <div class="info-value">${field.value}</div>
+                        </div>
+                    `;
+                }
+            });
+        }
+
+        function displayExperience(experiences) {
+            const container = document.getElementById('experienceList');
+            container.innerHTML = '';
+
+            if (experiences.length === 0) {
+                container.innerHTML = '<p style="color: #718096;">No experience data found</p>';
+                return;
+            }
+
+            experiences.forEach(exp => {
+                const dateRange = exp.current 
+                    ? `${exp.startDate || 'N/A'} - Present`
+                    : `${exp.startDate || 'N/A'} - ${exp.endDate || 'N/A'}`;
+
+                container.innerHTML += `
+                    <div class="experience-item">
+                        <div class="experience-header">
+                            <div>
+                                <div class="experience-title">${exp.title || 'N/A'}</div>
+                                <div class="experience-company">${exp.company || 'N/A'}</div>
+                            </div>
+                            <div class="experience-date">${dateRange}</div>
+                        </div>
+                        ${exp.location ? `<div class="experience-location">📍 ${exp.location}</div>` : ''}
+                        ${exp.description ? `<div class="experience-description">${exp.description}</div>` : ''}
+                    </div>
+                `;
+            });
+        }
+
+        function displayEducation(education) {
+            const container = document.getElementById('educationList');
+            container.innerHTML = '';
+
+            if (education.length === 0) {
+                container.innerHTML = '<p style="color: #718096;">No education data found</p>';
+                return;
+            }
+
+            education.forEach(edu => {
+                container.innerHTML += `
+                    <div class="education-item">
+                        <div class="experience-title">${edu.degree || 'Degree'}</div>
+                        <div class="experience-company">${edu.institution || 'N/A'}</div>
+                        ${edu.field ? `<div style="color: #a0aec0; margin: 8px 0;">📚 ${edu.field}</div>` : ''}
+                        <div style="color: #a0aec0; font-size: 0.95rem; margin-top: 8px;">
+                            ${edu.graduationDate ? `🎓 ${edu.graduationDate}` : ''}
+                            ${edu.gpa ? ` | GPA: ${edu.gpa}` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function displaySkills(skills) {
+            const container = document.getElementById('skillsList');
+            container.innerHTML = '';
+
+            if (skills.length === 0) {
+                container.innerHTML = '<p style="color: #718096;">No skills data found</p>';
+                return;
+            }
+
+            skills.forEach(skill => {
+                container.innerHTML += `<div class="skill-tag">${skill}</div>`;
+            });
+        }
+
+        function copyAsJSON() {
+            if (!currentData) return;
+            
+            const jsonString = JSON.stringify(currentData, null, 2);
+            navigator.clipboard.writeText(jsonString).then(() => {
+                const btn = document.getElementById('copyJsonBtn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<span>✅</span> Copied!';
+                btn.classList.add('success');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.classList.remove('success');
+                }, 2000);
+            });
+        }
+
+        function viewJSON() {
+            if (!currentData) return;
+            
+            const jsonString = JSON.stringify(currentData, null, 2);
+            document.getElementById('jsonCode').textContent = jsonString;
+            jsonModal.classList.add('active');
+        }
+
+        function closeJSON() {
+            jsonModal.classList.remove('active');
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('active');
+        }
+
+        function resetUpload() {
+            uploadSection.style.display = 'block';
+            resultsSection.classList.remove('active');
+            fileInput.value = '';
+            errorMessage.classList.remove('active');
+            currentData = null;
+        }
+
+        // Close modal on outside click
+        jsonModal.addEventListener('click', (e) => {
+            if (e.target === jsonModal) {
+                closeJSON();
+            }
+        });
+    </script>
+</body>
+</html>

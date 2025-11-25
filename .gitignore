@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.local
+
+# Vercel
+.vercel
+
+# Uploads
+uploads/*
+!uploads/.gitkeep
+
+# Debug
+debug-*.txt
+
+# System
+.DS_Store
+*.log
