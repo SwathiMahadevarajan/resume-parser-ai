@@ -11,13 +11,21 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads');
+try {
+  await fs.mkdir(uploadsDir, { recursive: true });
+  console.log('✅ Uploads directory ready');
+} catch (error) {
+  console.error('❌ Failed to create uploads directory:', error.message);
+}
+
 // Configure multer with file extension preservation
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
-    // Preserve original extension
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
     const ext = path.extname(file.originalname);
     cb(null, 'resume-' + uniqueSuffix + ext);
@@ -26,7 +34,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB limit
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowedTypes = /pdf|docx|txt/;
     const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
@@ -42,7 +50,7 @@ const upload = multer({
   }
 });
 
-// Serve static files
+// IMPORTANT: Serve static files BEFORE other routes
 app.use(express.static('public'));
 
 // Parse resume endpoint
@@ -59,7 +67,6 @@ app.post('/api/parse', upload.single('resume'), async (req, res) => {
 
   console.log('\n📁 Received file:', req.file.originalname);
   console.log('   Saved as:', req.file.filename);
-  console.log('   Extension:', path.extname(req.file.filename));
 
   try {
     const result = await parseResume(req.file.path);
@@ -70,7 +77,7 @@ app.post('/api/parse', upload.single('resume'), async (req, res) => {
     console.log('✅ Parse successful!\n');
     res.json(result);
   } catch (error) {
-    console.error('❌ Parse failed:', error.message, '\n');
+    console.error('❌ Parse failed:', error.message);
     
     // Clean up file on error
     try {
@@ -92,11 +99,20 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Resume Parser API is running' });
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log('\n🚀 Resume Parser Server');
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  console.log(`   URL: http://localhost:${PORT}`);
-  console.log(`   API: http://localhost:${PORT}/api/parse`);
-  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+// Catch-all route for SPA (serves index.html)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+// Start server (only for local development)
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log('\n🚀 Resume Parser Server');
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    console.log(`   URL: http://localhost:${PORT}`);
+    console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
+  });
+}
+
+// Export for Vercel
+export default app;
